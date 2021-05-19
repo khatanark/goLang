@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/justinas/nosurf"
 )
 
 func WriteToConsole(next http.Handler) http.Handler {
@@ -11,4 +13,18 @@ func WriteToConsole(next http.Handler) http.Handler {
 		// next
 		next.ServeHTTP(w, r)
 	})
+}
+
+// All middlewares must be of the return type http.Handler ?
+func NoSurf(next http.Handler) http.Handler {
+	csrfHandler := nosurf.New(next)
+	csrfHandler.SetBaseCookie(http.Cookie{
+		HttpOnly: true,
+		Path:     "/",
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	return csrfHandler
+
 }
